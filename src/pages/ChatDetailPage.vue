@@ -12,9 +12,13 @@ const newMessage = ref("");
 
 const newFile = ref() as Ref<File>;
 
-const { base64: newFileBase64 } = useBase64(newFile);
-
 const messages = ref<MessageReponse[]>([]);
+
+const inputText = ref<HTMLInputElement>();
+
+const inputFile = ref<HTMLInputElement>();
+
+const { base64: newFileBase64 } = useBase64(newFile);
 
 const myName = route.query.name;
 
@@ -40,14 +44,24 @@ socket.on("message", (response: MessageReponse) => {
   messages.value.push(response);
 });
 
-const mapMessageClass = (value: MessageReponse) =>
-  value.username === friendUsername
-    ? "bg-white rounded-full px-4 py-1 w-fit"
-    : value.username
-    ? "bg-primary text-white self-end rounded-full px-4 py-1 w-fit"
-    : "text-stone-400 self-center";
+const isDataImage = (base64Value: string) =>
+  base64Value.startsWith("data:image");
 
-const inputFile = ref<HTMLInputElement>();
+const mapMessageClass = (value: MessageReponse) => {
+  if (!value.username) {
+    return "text-stone-400 self-center";
+  }
+
+  const result =
+    value.username === friendUsername
+      ? "bg-white"
+      : "bg-primary text-white self-end";
+
+  return isDataImage(value.text)
+    ? `${result} rounded-3xl p-4 w-[75%] max-w-sm`
+    : `${result} w-fit rounded-full px-4 py-1`;
+};
+
 const onSelectFile = () => {
   inputFile.value?.click();
 };
@@ -57,12 +71,22 @@ const onInputFileChange = (e: Event) => {
 
   if (target.files) {
     newFile.value = target.files[0];
+    target.files = null;
   }
+
+  inputText.value?.focus();
 };
 
 const onSendMessage = () => {
-  socket.emit("chatMessage", newMessage.value);
-  newMessage.value = "";
+  if (newMessage.value) {
+    socket.emit("chatMessage", newMessage.value);
+    newMessage.value = "";
+  }
+
+  if (newFileBase64.value) {
+    socket.emit("chatImage", newFileBase64.value);
+    newFileBase64.value = "";
+  }
 };
 </script>
 
@@ -80,25 +104,44 @@ const onSendMessage = () => {
           :key="message.text + message.time + message.username"
           :class="[mapMessageClass(message)]"
         >
-          {{ message.text }}
+          <img
+            v-if="isDataImage(message.text)"
+            class="max-h-48 w-full object-contain"
+            :src="message.text"
+            :alt="message.text + message.time"
+          />
+          <template v-else>{{ message.text }}</template>
         </div>
-        <img v-if="newFileBase64" :src="newFileBase64" alt="new-base-64-file" />
       </div>
 
       <div class="flex justify-center mt-auto px-4">
-        <div class="form-control w-full">
+        <div class="form-control w-full relative">
+          <div
+            v-if="newFileBase64"
+            class="absolute bg-white p-4 bottom-11 w-full rounded-t-3xl"
+          >
+            <img
+              :src="newFileBase64"
+              class="max-h-48 object-contain"
+              alt="new-base-64-file"
+            />
+          </div>
           <div class="input-group">
             <button
-              class="btn btn-ghost bg-white !rounded-l-3xl"
+              type="button"
+              class="btn btn-ghost bg-white"
+              :class="newFileBase64 ? '!rounded-bl-3xl' : '!rounded-l-3xl'"
               @click="onSelectFile"
             >
               <BaseAttachFileIcon></BaseAttachFileIcon>
             </button>
             <input
               v-model="newMessage"
+              ref="inputText"
               type="text"
               placeholder="Type message ..."
-              class="input !rounded-r-3xl pl-0 w-full focus:outline-none"
+              class="input pl-0 w-full focus:outline-none"
+              :class="newFileBase64 ? '!rounded-br-3xl' : '!rounded-r-3xl'"
             />
           </div>
         </div>
