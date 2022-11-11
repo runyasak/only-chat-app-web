@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import BaseAttachFileIcon from "@/components/BaseAttachFileIcon.vue";
 import type { MessageReponse } from "@/models/chat.model";
+import { useBase64 } from "@vueuse/core";
 import openSocket from "socket.io-client";
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 
 const newMessage = ref("");
+
+const newFile = ref() as Ref<File>;
+
+const { base64: newFileBase64 } = useBase64(newFile);
 
 const messages = ref<MessageReponse[]>([]);
 
@@ -41,6 +47,19 @@ const mapMessageClass = (value: MessageReponse) =>
     ? "bg-primary text-white self-end rounded-full px-4 py-1 w-fit"
     : "text-stone-400 self-center";
 
+const inputFile = ref<HTMLInputElement>();
+const onSelectFile = () => {
+  inputFile.value?.click();
+};
+
+const onInputFileChange = (e: Event) => {
+  const target = <HTMLInputElement>e.target;
+
+  if (target.files) {
+    newFile.value = target.files[0];
+  }
+};
+
 const onSendMessage = () => {
   socket.emit("chatMessage", newMessage.value);
   newMessage.value = "";
@@ -63,16 +82,34 @@ const onSendMessage = () => {
         >
           {{ message.text }}
         </div>
+        <img v-if="newFileBase64" :src="newFileBase64" alt="new-base-64-file" />
       </div>
 
       <div class="flex justify-center mt-auto px-4">
-        <input
-          v-model="newMessage"
-          type="text"
-          placeholder="Type message ..."
-          class="input w-full rounded-3xl"
-        />
+        <div class="form-control w-full">
+          <div class="input-group">
+            <button
+              class="btn btn-ghost bg-white !rounded-l-3xl"
+              @click="onSelectFile"
+            >
+              <BaseAttachFileIcon></BaseAttachFileIcon>
+            </button>
+            <input
+              v-model="newMessage"
+              type="text"
+              placeholder="Type message ..."
+              class="input !rounded-r-3xl pl-0 w-full focus:outline-none"
+            />
+          </div>
+        </div>
       </div>
     </div>
+    <input
+      ref="inputFile"
+      accept="image/*"
+      class="hidden"
+      type="file"
+      @change="onInputFileChange"
+    />
   </form>
 </template>
