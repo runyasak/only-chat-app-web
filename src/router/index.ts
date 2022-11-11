@@ -10,9 +10,14 @@ const router = createRouter({
       component: HomePage,
     },
     {
-      path: "/chats/:id",
-      name: "chats-id",
+      path: "/chat-room",
+      name: "chat-room",
       component: () => import("@/pages/ChatDetailPage.vue"),
+    },
+    {
+      path: "/dev",
+      name: "dev",
+      component: () => import("@/pages/DevPage.vue"),
     },
   ],
 });
