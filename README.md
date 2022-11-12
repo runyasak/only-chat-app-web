@@ -1,5 +1,9 @@
 # only-chat-app-web
 
+<p align="center"><img src="https://github.com/runyasak/only-chat-app-web-starter/blob/main/docs/screenshot.png" /></p>
+
+<p align="center"><img src="https://github.com/runyasak/only-chat-app-web-starter/blob/main/docs/desktop-screenshot.png" /></p>
+
 ## Recommended IDE Setup
 
 [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
