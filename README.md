@@ -1,8 +1,8 @@
 # only-chat-app-web
 
-<p align="center"><img src="https://github.com/runyasak/only-chat-app-web-starter/blob/main/docs/screenshot.png" /></p>
+<p align="center"><img src="https://github.com/runyasak/only-chat-app-web/blob/main/docs/screenshot.png" /></p>
 
-<p align="center"><img src="https://github.com/runyasak/only-chat-app-web-starter/blob/main/docs/desktop-screenshot.png" /></p>
+<p align="center"><img src="https://github.com/runyasak/only-chat-app-web/blob/main/docs/desktop-screenshot.png" /></p>
 
 ## Recommended IDE Setup
 
