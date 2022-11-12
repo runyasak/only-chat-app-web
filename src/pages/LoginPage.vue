@@ -1,12 +1,37 @@
 <script setup lang="ts">
+import { useFetch, useStorage } from "@vueuse/core";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
+const storage = useStorage("myName", "");
+
 const username = ref("");
 
-const onLogin = () => router.push({ name: "chat-room" });
+const { data: userListResponse, isFetching } = useFetch(
+  `${import.meta.env.VITE_API_ENDPOINT}/user-list`
+).json<{
+  users: string[];
+  rooms: string[];
+}>();
+
+const onLogin = async () => {
+  const { data } = await useFetch(
+    `${import.meta.env.VITE_API_ENDPOINT}/create-user?name=${username.value}`
+  ).text();
+
+  storage.value = data.value;
+
+  router.push({
+    name: "chat-room",
+    query: {
+      name: userListResponse.value?.users.filter(
+        (user) => user !== data.value
+      )[0],
+    },
+  });
+};
 </script>
 
 <template>
@@ -26,6 +51,7 @@ const onLogin = () => router.push({ name: "chat-room" });
           class="input input-bordered w-full max-w-xs rounded-3xl"
         />
         <button
+          :disabled="isFetching"
           type="submit"
           class="btn btn-outline w-32 rounded-3xl !border-stone-400"
         >
